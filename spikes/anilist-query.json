@@ -1,0 +1,4 @@
+{
+  "query": "query ($season: MediaSeason, $seasonYear: Int, $page: Int) { Page(page: $page, perPage: 50) { pageInfo { total currentPage hasNextPage perPage } media(season: $season, seasonYear: $seasonYear, type: ANIME, format: TV, sort: POPULARITY_DESC) { id title { romaji native english } episodes format countryOfOrigin coverImage { large } nextAiringEpisode { airingAt episode timeUntilAiring } externalLinks { site url type language } streamingEpisodes { title url site } } } }",
+  "variables": { "season": "SUMMER", "seasonYear": 2026, "page": 1 }
+}
