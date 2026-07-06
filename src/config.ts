@@ -1,17 +1,20 @@
 // 実行時設定（Expo public env から取得）
 
+import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
 /**
- * Annict トークン。EXPO_PUBLIC_ANNICT_TOKEN（.env）から読む。
- * ※クライアント同梱は個人用途では許容。公開配布時はプロキシ経由に切り替える（README 参照）。
+ * Annict トークン（ネイティブ用）。EXPO_PUBLIC_ANNICT_TOKEN（.env）から読む。
+ * ※ネイティブの個人用途は許容。Web(PWA) ではバンドルに埋め込まず、サーバーレス関数
+ *   /api/annict がサーバ側の ANNICT_TOKEN を使う（src/api/annict.ts 参照）。
  */
 export const ANNICT_TOKEN: string =
   process.env.EXPO_PUBLIC_ANNICT_TOKEN ??
   (Constants.expoConfig?.extra?.annictToken as string | undefined) ??
   '';
 
-export const hasAnnictToken = ANNICT_TOKEN.length > 0;
+// Web はプロキシ経由でトークンを扱うため、クライアント側トークンが空でも利用可。
+export const hasAnnictToken = Platform.OS === 'web' || ANNICT_TOKEN.length > 0;
 
 /**
  * 表紙画像を表示するか。

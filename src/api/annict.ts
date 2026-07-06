@@ -1,8 +1,17 @@
-// Annict GraphQL API クライアント（fetch ベース・React Native / Node 両対応）
+// Annict GraphQL API クライアント（fetch ベース・React Native / Web 両対応）
+//
+// Web(PWA) では EXPO_PUBLIC_ANNICT_TOKEN をバンドルに埋め込みたくないため、
+// 同一オリジンのサーバーレス関数 /api/annict を経由し、トークンはサーバ側に置く。
+// ネイティブでは従来どおり Annict に直接アクセスする。
 
+import { Platform } from 'react-native';
 import type { AnnictWork } from '../types';
 
 const ENDPOINT = 'https://api.annict.com/graphql';
+// Web(PWA) のトークン秘匿プロキシ（CORESERVER の PHP）。配置場所が違う場合は
+// EXPO_PUBLIC_ANNICT_PROXY で上書きできる。
+const WEB_PROXY = process.env.EXPO_PUBLIC_ANNICT_PROXY ?? '/api/annict.php';
+const isWeb = Platform.OS === 'web';
 
 const SEASON_WORKS_QUERY = `
 query ($season: String!, $first: Int!) {
@@ -40,12 +49,14 @@ export async function fetchSeasonWorks(
   first = 100,
 ): Promise<AnnictWork[]> {
   const doFetch = opts.fetchImpl ?? fetch;
-  const res = await doFetch(opts.endpoint ?? ENDPOINT, {
+  const endpoint = opts.endpoint ?? (isWeb ? WEB_PROXY : ENDPOINT);
+  // Web はプロキシがトークンを付与するため Authorization を送らない
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (!isWeb && opts.token) headers.Authorization = `Bearer ${opts.token}`;
+
+  const res = await doFetch(endpoint, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${opts.token}`,
-    },
+    headers,
     body: JSON.stringify({
       query: SEASON_WORKS_QUERY,
       variables: { season, first },

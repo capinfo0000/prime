@@ -20,9 +20,15 @@
 3. 依存インストール：`npm install`
 4. 起動：`npx expo start` → iOS シミュレータ（`i`）または実機の Expo Go
 
+## 無料公開（Web版/PWA）
+App Store（$99/年）を使わず、**CORESERVER**（PHP対応の共有サーバー）で Web版として無料公開できます。
+手順は **[`docs/DEPLOY.md`](docs/DEPLOY.md)**。`npm run build:web` → `dist/` をアップロード → サーバに
+`api/config.php`（トークン）を設置、の3ステップです。
+
 ## スクリプト
 - `npm test` … ロジックのユニットテスト（season/services/schedule/workCard）
 - `npm run typecheck` … 型チェック
+- `npm run build:web` … Web版(PWA)を `dist/` に書き出し（CORESERVER 等へアップロード用）
 - `npm run spike:annict` … Annict 実データ検証（`.env` の ANNICT_TOKEN 使用）
 - `npm run spike:anilist` … AniList 検証（トークン不要）
 

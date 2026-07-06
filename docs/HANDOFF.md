@@ -40,6 +40,7 @@ Prime はドラマ・映画・過去アニメが混在して今期新作が探�
 | 7 | 表紙画像 | **画像あり**（無い作品はモノグラムにフォールバック） |
 | 8 | 権利対策 | **出典明記＋可能な限りの対策**（copyright表記・公式リンク・クレジット画面・削除要請窓口） |
 | 9 | 連絡先 | 削除要請窓口 = `ai.asset.lab1@gmail.com` |
+| 10 | 公開方法 | **お金を払わず公開** → **Web版(PWA) を CORESERVER（契約済み共有サーバー）で公開**。App Store($99)は当面見送り |
 
 ---
 
@@ -164,6 +165,17 @@ prime/
 6. 検証スクリプト：`npm test`（ロジック）／`npm run typecheck`／`npm run spike:annict`（要 .env）
 
 ---
+
+## 8.5 無料公開（Web版/PWA・CORESERVER）
+
+App Store（$99/年）を使わず、契約済みの **CORESERVER**（PHP対応の共有サーバー）で Web版として無料公開する。
+- ビルド：`npm run build:web`（`.env` を読まず、トークンをバンドルに含めない。`dist/` を出力）
+- `dist/` を CORESERVER の公開ディレクトリにアップロード
+- サーバ上で `api/config.example.php` → `api/config.php` を作り Annict トークンを設定
+  （トークンは PHP プロキシ `/api/annict.php` がサーバ側で付与。Webバンドルには入らない）
+- iPhone は Safari で開き「ホーム画面に追加」でアプリ風に
+- **詳細な手順は [`docs/DEPLOY.md`](DEPLOY.md)**
+- 制約：Web版は iOS 通知が弱い／視聴リンクは実機確認推奨
 
 ## 9. 残タスク（この環境では不可＝要・実機/自環境）
 

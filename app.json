@@ -18,8 +18,21 @@
         {
           "color": "#111827"
         }
-      ]
+      ],
+      "expo-asset",
+      "expo-font"
     ],
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "name": "アニメどこ見れ",
+      "shortName": "どこ見れ",
+      "lang": "ja",
+      "display": "standalone",
+      "themeColor": "#010102",
+      "backgroundColor": "#010102",
+      "description": "今期プライムビデオ配信のアニメを更新曜日つきで一覧"
+    },
     "experiments": {
       "typedRoutes": true
     }

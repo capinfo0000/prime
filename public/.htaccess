@@ -1,0 +1,21 @@
+# CORESERVER (Apache) 用ルーティング
+# expo-router の静的書き出しは about.html などを生成する。
+# 実ファイルはそのまま配信し、無ければ .html を試し、最後は index.html にフォールバック
+# （クライアント側ルーティングが URL を解決する）。
+
+Options -MultiViews
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # 実在するファイル/ディレクトリはそのまま
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # /about → /about.html のように .html を補完
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.*)$ $1.html [L]
+
+  # それ以外は index.html（動的ルート /work/xxx 等はJSが解決）
+  RewriteRule ^ index.html [L]
+</IfModule>
