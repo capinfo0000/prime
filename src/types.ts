@@ -39,9 +39,13 @@ export interface AnnictWork {
   media?: string | null;
   episodesCount?: number | null;
   seasonName?: string | null;
+  officialSiteUrl?: string | null;
+  wikipediaUrl?: string | null;
   image?: {
     recommendedImageUrl?: string | null;
     facebookOgImageUrl?: string | null;
+    /** 権利表記（あれば） */
+    copyright?: string | null;
   } | null;
   programs?: { nodes: AnnictProgram[] } | null;
 }

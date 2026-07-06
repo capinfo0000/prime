@@ -20,3 +20,18 @@ export const hasAnnictToken = ANNICT_TOKEN.length > 0;
  * 画像が無い作品は自動的に頭文字モノグラムにフォールバックする。
  */
 export const SHOW_COVER_IMAGES = true;
+
+// --- クレジット / 出典 / 連絡先（可能な限りの権利対策） ---
+
+/** データ提供元 */
+export const DATA_SOURCE_NAME = 'Annict';
+export const DATA_SOURCE_URL = 'https://annict.com';
+
+/**
+ * 削除要請・問い合わせ先。公開前に必ず自分の連絡先に置き換えること。
+ * 権利者が連絡できる窓口を用意しておくのが「可能な限りの対策」の要。
+ */
+export const CONTACT_EMAIL = 'your-contact@example.com';
+
+/** アプリ表示名（クレジット用） */
+export const APP_NAME = 'アニメどこ見れ';

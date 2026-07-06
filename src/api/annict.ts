@@ -13,7 +13,9 @@ query ($season: String!, $first: Int!) {
       media
       episodesCount
       seasonName
-      image { recommendedImageUrl facebookOgImageUrl }
+      officialSiteUrl
+      wikipediaUrl
+      image { recommendedImageUrl facebookOgImageUrl copyright }
       programs(first: 100) {
         nodes {
           startedAt

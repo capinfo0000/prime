@@ -10,7 +10,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { hasAnnictToken, SHOW_COVER_IMAGES } from '../src/config';
@@ -69,6 +69,15 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <Link href="/about" style={styles.infoBtn}>
+              ⓘ
+            </Link>
+          ),
+        }}
+      />
       <ServiceFilter selected={service} onSelect={setService} />
       <View style={styles.headingRow}>
         <Text style={styles.eyebrow}>{seasonLabelJa(getSeason()).toUpperCase()}</Text>
@@ -242,4 +251,5 @@ const styles = StyleSheet.create({
   empty: { ...type.body, color: colors.inkSubtle, textAlign: 'center', marginTop: 40 },
   error: { color: '#f87171', textAlign: 'center' },
   notice: { ...type.body, color: colors.inkSubtle, textAlign: 'center', lineHeight: 22 },
+  infoBtn: { color: colors.inkSubtle, fontSize: 18, paddingHorizontal: 4 },
 });

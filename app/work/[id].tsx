@@ -12,7 +12,7 @@ import {
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { SHOW_COVER_IMAGES } from '../../src/config';
+import { SHOW_COVER_IMAGES, DATA_SOURCE_NAME, DATA_SOURCE_URL } from '../../src/config';
 import { getCachedWork } from '../../src/lib/store';
 import { classifyChannel, channelsToServices, primeWatchUrl } from '../../src/lib/services';
 import { summarizeSchedule, scheduleHeadline } from '../../src/lib/schedule';
@@ -152,6 +152,31 @@ export default function WorkDetailScreen() {
             ))}
           </View>
         )}
+
+        <Text style={styles.sectionTitle}>出典・権利表記</Text>
+        <View style={styles.creditCard}>
+          {work.image?.copyright ? (
+            <Text style={styles.copyright}>© {work.image.copyright}</Text>
+          ) : (
+            <Text style={styles.creditText}>
+              作品情報・画像の著作権は各製作委員会・権利者に帰属します。
+            </Text>
+          )}
+          {work.officialSiteUrl ? (
+            <Pressable
+              style={styles.creditLink}
+              onPress={() => Linking.openURL(work.officialSiteUrl as string)}
+            >
+              <Text style={styles.creditLinkText}>公式サイト ↗</Text>
+            </Pressable>
+          ) : null}
+          <Pressable
+            style={styles.creditLink}
+            onPress={() => Linking.openURL(DATA_SOURCE_URL)}
+          >
+            <Text style={styles.creditLinkText}>データ提供: {DATA_SOURCE_NAME} ↗</Text>
+          </Pressable>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -220,4 +245,16 @@ const styles = StyleSheet.create({
   epDate: { ...type.bodySm, color: colors.inkSubtle },
   epDateFuture: { color: colors.primaryHover, fontWeight: '600' },
   notice: { ...type.body, color: colors.inkSubtle, lineHeight: 22 },
+  creditCard: {
+    backgroundColor: colors.surface1,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.hairline,
+    padding: space.md,
+    gap: space.sm,
+  },
+  copyright: { ...type.caption, color: colors.inkMuted, lineHeight: 18 },
+  creditText: { ...type.caption, color: colors.inkMuted, lineHeight: 18 },
+  creditLink: { paddingTop: 2 },
+  creditLinkText: { ...type.caption, color: colors.primaryHover, fontWeight: '600' },
 });

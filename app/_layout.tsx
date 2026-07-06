@@ -19,6 +19,7 @@ export default function RootLayout() {
       >
         <Stack.Screen name="index" options={{ title: 'アニメどこ見れ' }} />
         <Stack.Screen name="work/[id]" options={{ title: '作品詳細' }} />
+        <Stack.Screen name="about" options={{ title: 'このアプリについて' }} />
       </Stack>
     </SafeAreaProvider>
   );
