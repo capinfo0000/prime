@@ -13,12 +13,13 @@ import {
 import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { hasAnnictToken } from '../src/config';
+import { hasAnnictToken, SHOW_COVER_IMAGES } from '../src/config';
 import { loadSeasonWorks } from '../src/lib/store';
 import { toWorkCards } from '../src/lib/workCard';
 import { scheduleHeadline } from '../src/lib/schedule';
 import { FILTERABLE_SERVICES } from '../src/lib/services';
 import { getSeason, seasonLabelJa } from '../src/lib/season';
+import { colors, radius, space, type } from '../src/theme';
 import type { AnnictWork, StreamingServiceId, WorkCard } from '../src/types';
 
 export default function HomeScreen() {
@@ -31,8 +32,7 @@ export default function HomeScreen() {
   const load = useCallback(async (force = false) => {
     try {
       setError(null);
-      const w = await loadSeasonWorks(force);
-      setWorks(w);
+      setWorks(await loadSeasonWorks(force));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     }
@@ -70,11 +70,17 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <ServiceFilter selected={service} onSelect={setService} />
-      <Text style={styles.seasonLabel}>{seasonLabelJa(getSeason())}の新作</Text>
+      <View style={styles.headingRow}>
+        <Text style={styles.eyebrow}>{seasonLabelJa(getSeason()).toUpperCase()}</Text>
+        <Text style={styles.heading}>今期の新作アニメ</Text>
+        {!loading && !error && (
+          <Text style={styles.count}>{cards.length}作品</Text>
+        )}
+      </View>
 
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : error ? (
         <View style={styles.center}>
@@ -85,7 +91,9 @@ export default function HomeScreen() {
           data={cards}
           keyExtractor={(c) => c.id}
           contentContainerStyle={styles.list}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.inkSubtle} />
+          }
           ListEmptyComponent={
             <Text style={styles.empty}>このサービスで配信中の今期アニメは見つかりませんでした。</Text>
           }
@@ -125,15 +133,25 @@ function ServiceFilter({
   );
 }
 
+function PosterTile({ card }: { card: WorkCard }) {
+  if (SHOW_COVER_IMAGES && card.imageUrl) {
+    return <Image source={{ uri: card.imageUrl }} style={styles.poster} />;
+  }
+  // 画像を使わないタイトル主役デザイン: 頭文字モノグラム
+  const initial = card.title.trim().charAt(0) || '?';
+  return (
+    <View style={[styles.poster, styles.posterMono]}>
+      <Text style={styles.posterInitial}>{initial}</Text>
+    </View>
+  );
+}
+
 function WorkRow({ card }: { card: WorkCard }) {
+  const next = card.schedule?.nextEpisode;
   return (
     <Link href={`/work/${card.id}`} asChild>
       <Pressable style={styles.row}>
-        {card.imageUrl ? (
-          <Image source={{ uri: card.imageUrl }} style={styles.thumb} />
-        ) : (
-          <View style={[styles.thumb, styles.thumbPlaceholder]} />
-        )}
+        <PosterTile card={card} />
         <View style={styles.rowBody}>
           <Text style={styles.title} numberOfLines={2}>
             {card.title}
@@ -143,63 +161,85 @@ function WorkRow({ card }: { card: WorkCard }) {
           </Text>
           <View style={styles.badges}>
             {card.services.map((s) => (
-              <Text key={s.id} style={styles.badge}>
-                {s.label}
-              </Text>
+              <View key={s.id} style={styles.badge}>
+                <Text style={styles.badgeText}>{s.label}</Text>
+              </View>
             ))}
           </View>
         </View>
+        {next ? (
+          <View style={styles.epTag}>
+            <Text style={styles.epTagText}>#{next}</Text>
+          </View>
+        ) : null}
       </Pressable>
     </Link>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  seasonLabel: { fontSize: 13, color: '#6b7280', paddingHorizontal: 16, paddingBottom: 4 },
-  filterRow: { paddingHorizontal: 12, paddingVertical: 10, gap: 8 },
+  container: { flex: 1, backgroundColor: colors.canvas },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: space.lg, backgroundColor: colors.canvas },
+  headingRow: { paddingHorizontal: space.md, paddingTop: space.xs, paddingBottom: space.sm },
+  eyebrow: { ...type.eyebrow },
+  heading: { ...type.display, marginTop: 2 },
+  count: { ...type.caption, marginTop: 2 },
+  filterRow: { paddingHorizontal: space.sm, paddingVertical: space.sm, gap: space.xs },
   chip: {
     paddingHorizontal: 14,
     paddingVertical: 7,
-    borderRadius: 999,
-    backgroundColor: '#e5e7eb',
-    marginRight: 8,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surface1,
+    borderWidth: 1,
+    borderColor: colors.hairline,
+    marginRight: space.xs,
   },
-  chipActive: { backgroundColor: '#111827' },
-  chipText: { fontSize: 13, color: '#374151', fontWeight: '600' },
-  chipTextActive: { color: '#fff' },
-  list: { padding: 12, gap: 10 },
+  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  chipText: { ...type.button, color: colors.inkSubtle },
+  chipTextActive: { color: colors.onPrimary },
+  list: { padding: space.sm, paddingBottom: space.xxl },
   row: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 10,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
+    alignItems: 'center',
+    backgroundColor: colors.surface1,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.hairline,
+    padding: space.sm,
+    marginBottom: space.sm,
   },
-  thumb: { width: 72, height: 96, borderRadius: 8, backgroundColor: '#e5e7eb' },
-  thumbPlaceholder: { alignItems: 'center', justifyContent: 'center' },
-  rowBody: { flex: 1, marginLeft: 12 },
-  title: { fontSize: 15, fontWeight: '700', color: '#111827' },
-  schedule: { marginTop: 4, fontSize: 13, color: '#2563eb', fontWeight: '600' },
-  badges: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 6, gap: 6 },
+  poster: { width: 56, height: 76, borderRadius: radius.md, backgroundColor: colors.surface3 },
+  posterMono: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.hairlineStrong,
+  },
+  posterInitial: { ...type.headline, color: colors.inkSubtle },
+  rowBody: { flex: 1, marginLeft: space.sm },
+  title: { ...type.cardTitle },
+  schedule: { marginTop: 4, fontSize: 13, fontWeight: '600', color: colors.primaryHover, letterSpacing: -0.1 },
+  badges: { flexDirection: 'row', flexWrap: 'wrap', marginTop: space.xs, gap: space.xxs },
   badge: {
-    fontSize: 11,
-    color: '#374151',
-    backgroundColor: '#f3f4f6',
-    borderRadius: 6,
+    backgroundColor: colors.surface2,
+    borderRadius: radius.xs,
     paddingHorizontal: 6,
     paddingVertical: 2,
-    marginRight: 6,
+    marginRight: space.xxs,
     marginTop: 2,
-    overflow: 'hidden',
   },
-  empty: { textAlign: 'center', color: '#6b7280', marginTop: 40 },
-  error: { color: '#dc2626', textAlign: 'center' },
-  notice: { color: '#6b7280', textAlign: 'center', lineHeight: 22 },
+  badgeText: { ...type.caption, color: colors.inkMuted },
+  epTag: {
+    marginLeft: space.xs,
+    backgroundColor: colors.surface2,
+    borderRadius: radius.pill,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderWidth: 1,
+    borderColor: colors.hairline,
+  },
+  epTagText: { ...type.caption, color: colors.inkMuted },
+  empty: { ...type.body, color: colors.inkSubtle, textAlign: 'center', marginTop: 40 },
+  error: { color: '#f87171', textAlign: 'center' },
+  notice: { ...type.body, color: colors.inkSubtle, textAlign: 'center', lineHeight: 22 },
 });

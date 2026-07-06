@@ -12,10 +12,12 @@ import {
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { SHOW_COVER_IMAGES } from '../../src/config';
 import { getCachedWork } from '../../src/lib/store';
 import { classifyChannel, channelsToServices, primeWatchUrl } from '../../src/lib/services';
 import { summarizeSchedule, scheduleHeadline } from '../../src/lib/schedule';
 import { isFavorite, toggleFavorite } from '../../src/lib/favorites';
+import { colors, radius, space, type } from '../../src/theme';
 import type { StreamingService } from '../../src/types';
 
 const WD = ['日', '月', '火', '水', '木', '金', '土'];
@@ -48,7 +50,7 @@ export default function WorkDetailScreen() {
       .filter((p) => classifyChannel(p.channel?.name).id === activeSvc.id && p.startedAt)
       .map((p) => Date.parse(p.startedAt as string))
       .sort((a, b) => a - b)
-      .map((ms, i) => ({ ep: i + 1, at: new Date(ms).toISOString() }));
+      .map((ms, i) => ({ ep: i + 1, at: new Date(ms).toISOString(), past: ms <= Date.now() }));
   }, [work, activeSvc]);
 
   const schedule = useMemo(
@@ -85,15 +87,19 @@ export default function WorkDetailScreen() {
     await Linking.openURL(url);
   };
 
+  const initial = work.title.trim().charAt(0) || '?';
+
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <Stack.Screen options={{ title: work.title }} />
       <ScrollView contentContainerStyle={styles.body}>
         <View style={styles.header}>
-          {work.image?.recommendedImageUrl ? (
+          {SHOW_COVER_IMAGES && work.image?.recommendedImageUrl ? (
             <Image source={{ uri: work.image.recommendedImageUrl }} style={styles.cover} />
           ) : (
-            <View style={[styles.cover, styles.coverPlaceholder]} />
+            <View style={[styles.cover, styles.coverMono]}>
+              <Text style={styles.coverInitial}>{initial}</Text>
+            </View>
           )}
           <View style={styles.headerBody}>
             <Text style={styles.title}>{work.title}</Text>
@@ -108,11 +114,20 @@ export default function WorkDetailScreen() {
 
         <Text style={styles.sectionTitle}>視聴</Text>
         <View style={styles.watchRow}>
-          {services.map((s) => (
-            <Pressable key={s.id} style={styles.watchBtn} onPress={() => onWatch(s)}>
-              <Text style={styles.watchText}>▶ {s.label}で見る</Text>
-            </Pressable>
-          ))}
+          {services.map((s) => {
+            const isPrime = s.id === 'prime';
+            return (
+              <Pressable
+                key={s.id}
+                style={[styles.watchBtn, isPrime ? styles.watchPrimary : styles.watchSecondary]}
+                onPress={() => onWatch(s)}
+              >
+                <Text style={[styles.watchText, !isPrime && styles.watchTextSecondary]}>
+                  ▶ {s.label}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
 
         <Text style={styles.sectionTitle}>
@@ -121,12 +136,17 @@ export default function WorkDetailScreen() {
         {episodes.length === 0 ? (
           <Text style={styles.notice}>配信日情報がありません。</Text>
         ) : (
-          episodes.map((e) => (
-            <View key={e.ep} style={styles.epRow}>
-              <Text style={styles.epNum}>第{e.ep}話</Text>
-              <Text style={styles.epDate}>{fmtDate(e.at)}</Text>
-            </View>
-          ))
+          <View style={styles.epCard}>
+            {episodes.map((e, i) => (
+              <View key={e.ep} style={[styles.epRow, i === episodes.length - 1 && styles.epRowLast]}>
+                <Text style={[styles.epNum, !e.past && styles.epNumFuture]}>第{e.ep}話</Text>
+                <Text style={[styles.epDate, !e.past && styles.epDateFuture]}>
+                  {fmtDate(e.at)}
+                  {!e.past ? '  ・次回' : ''}
+                </Text>
+              </View>
+            ))}
+          </View>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -134,46 +154,66 @@ export default function WorkDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  body: { padding: 16 },
+  container: { flex: 1, backgroundColor: colors.canvas },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: space.lg, backgroundColor: colors.canvas },
+  body: { padding: space.md, paddingBottom: space.xxl },
   header: { flexDirection: 'row' },
-  cover: { width: 110, height: 150, borderRadius: 10, backgroundColor: '#e5e7eb' },
-  coverPlaceholder: {},
-  headerBody: { flex: 1, marginLeft: 14 },
-  title: { fontSize: 18, fontWeight: '800', color: '#111827' },
-  schedule: { marginTop: 6, fontSize: 14, color: '#2563eb', fontWeight: '700' },
+  cover: { width: 96, height: 132, borderRadius: radius.lg, backgroundColor: colors.surface3 },
+  coverMono: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.hairlineStrong,
+  },
+  coverInitial: { ...type.display, fontSize: 40, color: colors.inkSubtle },
+  headerBody: { flex: 1, marginLeft: space.md },
+  title: { ...type.headline },
+  schedule: { marginTop: 6, fontSize: 14, fontWeight: '700', color: colors.primaryHover, letterSpacing: -0.2 },
   favBtn: {
-    marginTop: 12,
+    marginTop: space.sm,
     alignSelf: 'flex-start',
     borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 999,
+    borderColor: colors.hairlineStrong,
+    borderRadius: radius.pill,
     paddingHorizontal: 14,
     paddingVertical: 8,
+    backgroundColor: colors.surface1,
   },
-  favBtnOn: { backgroundColor: '#fef3c7', borderColor: '#f59e0b' },
-  favText: { color: '#374151', fontWeight: '600', fontSize: 13 },
-  favTextOn: { color: '#b45309' },
-  sectionTitle: { marginTop: 24, marginBottom: 10, fontSize: 15, fontWeight: '800', color: '#111827' },
-  watchRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  favBtnOn: { backgroundColor: colors.surface2, borderColor: colors.primary },
+  favText: { ...type.button, color: colors.inkMuted },
+  favTextOn: { color: colors.primaryHover },
+  sectionTitle: { ...type.eyebrow, marginTop: space.lg, marginBottom: space.sm },
+  watchRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.xs },
   watchBtn: {
-    backgroundColor: '#111827',
-    borderRadius: 10,
+    borderRadius: radius.md,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    marginRight: 10,
-    marginBottom: 10,
+    marginRight: space.xs,
+    marginBottom: space.xs,
   },
-  watchText: { color: '#fff', fontWeight: '700', fontSize: 13 },
+  watchPrimary: { backgroundColor: colors.primary },
+  watchSecondary: { backgroundColor: colors.surface1, borderWidth: 1, borderColor: colors.hairline },
+  watchText: { ...type.button, color: colors.onPrimary },
+  watchTextSecondary: { color: colors.ink },
+  epCard: {
+    backgroundColor: colors.surface1,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.hairline,
+    paddingHorizontal: space.md,
+  },
   epRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 10,
+    alignItems: 'center',
+    paddingVertical: space.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: colors.hairline,
   },
-  epNum: { fontSize: 14, color: '#111827', fontWeight: '600' },
-  epDate: { fontSize: 14, color: '#6b7280' },
-  notice: { color: '#6b7280', lineHeight: 22 },
+  epRowLast: { borderBottomWidth: 0 },
+  epNum: { ...type.body, color: colors.inkMuted, fontWeight: '600' },
+  epNumFuture: { color: colors.ink },
+  epDate: { ...type.bodySm, color: colors.inkSubtle },
+  epDateFuture: { color: colors.primaryHover, fontWeight: '600' },
+  notice: { ...type.body, color: colors.inkSubtle, lineHeight: 22 },
 });
