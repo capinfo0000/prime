@@ -14,8 +14,9 @@ export const ANNICT_TOKEN: string =
 export const hasAnnictToken = ANNICT_TOKEN.length > 0;
 
 /**
- * 表紙画像を表示するか。既定 false（タイトル主役）。
- * 画像の著作権は製作委員会/スタジオにあり、App Store 公開時の IP リスク回避のため既定はオフ。
- * 権利を確認できた／個人利用なら true に。
+ * 表紙画像を表示するか。
+ * 画像は各アニメ公式サイトの OGP を Annict 経由で参照（著作権は製作委員会/スタジオ）。
+ * App Store 公開時は IP リスクがあるため、削除要請には即応する運用を前提とする。
+ * 画像が無い作品は自動的に頭文字モノグラムにフォールバックする。
  */
-export const SHOW_COVER_IMAGES = false;
+export const SHOW_COVER_IMAGES = true;

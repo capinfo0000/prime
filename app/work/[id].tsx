@@ -94,8 +94,12 @@ export default function WorkDetailScreen() {
       <Stack.Screen options={{ title: work.title }} />
       <ScrollView contentContainerStyle={styles.body}>
         <View style={styles.header}>
-          {SHOW_COVER_IMAGES && work.image?.recommendedImageUrl ? (
-            <Image source={{ uri: work.image.recommendedImageUrl }} style={styles.cover} />
+          {SHOW_COVER_IMAGES && (work.image?.recommendedImageUrl || work.image?.facebookOgImageUrl) ? (
+            <Image
+              source={{ uri: work.image.recommendedImageUrl || work.image.facebookOgImageUrl! }}
+              style={styles.cover}
+              resizeMode="cover"
+            />
           ) : (
             <View style={[styles.cover, styles.coverMono]}>
               <Text style={styles.coverInitial}>{initial}</Text>

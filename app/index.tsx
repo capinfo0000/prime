@@ -135,7 +135,7 @@ function ServiceFilter({
 
 function PosterTile({ card }: { card: WorkCard }) {
   if (SHOW_COVER_IMAGES && card.imageUrl) {
-    return <Image source={{ uri: card.imageUrl }} style={styles.poster} />;
+    return <Image source={{ uri: card.imageUrl }} style={styles.poster} resizeMode="cover" />;
   }
   // 画像を使わないタイトル主役デザイン: 頭文字モノグラム
   const initial = card.title.trim().charAt(0) || '?';
