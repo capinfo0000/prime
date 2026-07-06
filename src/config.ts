@@ -31,7 +31,7 @@ export const DATA_SOURCE_URL = 'https://annict.com';
  * 削除要請・問い合わせ先。公開前に必ず自分の連絡先に置き換えること。
  * 権利者が連絡できる窓口を用意しておくのが「可能な限りの対策」の要。
  */
-export const CONTACT_EMAIL = 'your-contact@example.com';
+export const CONTACT_EMAIL = 'ai.asset.lab1@gmail.com';
 
 /** アプリ表示名（クレジット用） */
 export const APP_NAME = 'アニメどこ見れ';
