@@ -41,6 +41,9 @@ define('ANNICT_TOKEN', 'あなたの Annict 個人アクセストークン(read)
 - Annict トークン発行：https://annict.com/settings/apps
 - `config.php` は**サーバにだけ**置く（Git/バンドルには入れない。`.gitignore` 済み）。
 - PHP ソースはブラウザに表示されないため、ここにトークンを置いても漏れない（`.htaccess` でも直接アクセス拒否）。
+- **推奨**：`config.php` に `define('ALLOWED_ORIGIN', 'https://あなたのドメイン');` を設定すると、
+  自サイト以外からのプロキシ悪用を防げる（オープンプロキシ化の防止）。
+- **重要**：開発中に共有したトークンは漏洩扱い。公開前に **Annict で再発行**して設定すること（詳細は [`SECURITY.md`](SECURITY.md)）。
 
 ### 4. 動作確認
 - `https://あなたのドメイン/` を開く → 今期プライム配信アニメの一覧が出る。

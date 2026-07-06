@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Image,
-  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -17,6 +16,7 @@ import { getCachedWork } from '../../src/lib/store';
 import { classifyChannel, channelsToServices, primeWatchUrl } from '../../src/lib/services';
 import { summarizeSchedule, scheduleHeadline } from '../../src/lib/schedule';
 import { isFavorite, toggleFavorite } from '../../src/lib/favorites';
+import { safeOpenUrl, isSafeUrl } from '../../src/lib/url';
 import { colors, radius, space, type } from '../../src/theme';
 import type { StreamingService } from '../../src/types';
 
@@ -84,7 +84,7 @@ export default function WorkDetailScreen() {
       Alert.alert('未対応', `${svc.label} への直接リンクは未対応です`);
       return;
     }
-    await Linking.openURL(url);
+    await safeOpenUrl(url);
   };
 
   const initial = work.title.trim().charAt(0) || '?';
@@ -162,17 +162,17 @@ export default function WorkDetailScreen() {
               作品情報・画像の著作権は各製作委員会・権利者に帰属します。
             </Text>
           )}
-          {work.officialSiteUrl ? (
+          {work.officialSiteUrl && isSafeUrl(work.officialSiteUrl) ? (
             <Pressable
               style={styles.creditLink}
-              onPress={() => Linking.openURL(work.officialSiteUrl as string)}
+              onPress={() => safeOpenUrl(work.officialSiteUrl)}
             >
               <Text style={styles.creditLinkText}>公式サイト ↗</Text>
             </Pressable>
           ) : null}
           <Pressable
             style={styles.creditLink}
-            onPress={() => Linking.openURL(DATA_SOURCE_URL)}
+            onPress={() => safeOpenUrl(DATA_SOURCE_URL)}
           >
             <Text style={styles.creditLinkText}>データ提供: {DATA_SOURCE_NAME} ↗</Text>
           </Pressable>

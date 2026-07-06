@@ -24,6 +24,7 @@
 App Store（$99/年）を使わず、**CORESERVER**（PHP対応の共有サーバー）で Web版として無料公開できます。
 手順は **[`docs/DEPLOY.md`](docs/DEPLOY.md)**。`npm run build:web` → `dist/` をアップロード → サーバに
 `api/config.php`（トークン）を設置、の3ステップです。
+セキュリティ対策と公開前チェックリストは **[`docs/SECURITY.md`](docs/SECURITY.md)**（※公開前に Annict トークンの再発行が必須）。
 
 ## スクリプト
 - `npm test` … ロジックのユニットテスト（season/services/schedule/workCard）
