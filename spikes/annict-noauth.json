@@ -1,0 +1,1 @@
+{"query":"{ searchWorks(seasons:[\"2026-summer\"], first:1){ nodes{ title } } }"}

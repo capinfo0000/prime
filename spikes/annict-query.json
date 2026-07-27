@@ -1,0 +1,4 @@
+{
+  "query": "query ($season: String!) { searchWorks(seasons: [$season], orderBy: {field: WATCHERS_COUNT, direction: DESC}, first: 50) { nodes { annictId title media episodesCount seasonName image { recommendedImageUrl facebookOgImageUrl } programs(first: 100) { nodes { startedAt channel { name } } } } } }",
+  "variables": { "season": "2026-summer" }
+}

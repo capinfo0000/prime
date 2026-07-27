@@ -1,0 +1,19 @@
+# secrets
+.env
+.env.local
+public/api/config.php
+
+# spike raw responses (regenerated on run)
+spikes/*-response.json
+
+# node / expo
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+npm-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store

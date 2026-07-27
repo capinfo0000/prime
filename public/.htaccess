@@ -1,0 +1,38 @@
+# --- セキュリティヘッダ ---
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=()"
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  # Expo Web はランタイムで inline script/style を使うため 'unsafe-inline' を許容。
+  # 画像は各アニメ公式サイトの https を許可。通信は同一オリジン(/api)のみ。
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+</IfModule>
+
+# --- config.php 等の秘匿ファイルを拒否（多重防御）---
+<FilesMatch "(^\.env|config\.php)$">
+  Require all denied
+</FilesMatch>
+
+# CORESERVER (Apache) 用ルーティング
+# expo-router の静的書き出しは about.html などを生成する。
+# 実ファイルはそのまま配信し、無ければ .html を試し、最後は index.html にフォールバック
+# （クライアント側ルーティングが URL を解決する）。
+
+Options -MultiViews
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # 実在するファイル/ディレクトリはそのまま
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # /about → /about.html のように .html を補完
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.*)$ $1.html [L]
+
+  # それ以外は index.html（動的ルート /work/xxx 等はJSが解決）
+  RewriteRule ^ index.html [L]
+</IfModule>
